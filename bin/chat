@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+import openai
+from colorama import Fore
+from os import system
+from os import name as osName
+from base64 import b64decode
+
+def cls():
+    system('cls' if osName=='nt' else 'clear')
+
+class CodeExecutor(object):
+    def __init__(self, code_string="", code_object=None):
+        self.code_string = code_string
+        self.code_object = code_object
+        self.function_list = {}
+        
+    def compile_code(self, code_string):
+        self.code_string = code_string
+        self.code_object = compile(self.code_string, "tmpfile", "exec")
+        
+    def execute(self):
+        if self.code_object is not None:
+            resp = exec(self.code_object)
+            for co_name in self.code_object.co_names:
+                if co_name not in self.function_list:
+                    self.function_list[co_name] = eval(co_name)
+            return resp
+        else:
+            return None
+        
+class ChatGPT:
+    def __init__(self, api_key, engine):
+        self.api_key = api_key
+        self.engine = engine
+        openai.api_key = api_key
+        
+    def chat(self, prompt):
+        completions = openai.Completion.create(
+            prompt=prompt,
+            engine=self.engine,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        message = completions.choices[0].text
+        return message
+
+def runner(code_executor, resp):
+    code_executor.compile_code(resp)
+    if code_executor.code_object is not None:
+        print(f"co_names -> {code_executor.code_object.co_names}")
+    code_executor.execute()
+    
+def chat_and_run(chat_engine, code_executor, chat_message, should_run=True):
+    while True:
+        try:
+            resp = chat_engine.chat(chat_message)
+            print("#" * 30)
+            print(Fore.YELLOW + resp)
+            if should_run:
+                runner(code_executor, resp)
+            break
+        except Exception as e:
+            print(f"Run failed, try again. -> {e}")
+            continue
+        
+def main(API_KEY, engine, message):
+    chat = ChatGPT(API_KEY, engine)
+    code_executor = CodeExecutor()
+    chat_and_run(chat, code_executor,
+                 message,
+                 should_run=False)
+
+import os
+engine = "text-davinci-003"
+try:
+    with open("api_key", "r") as f:
+        API_KEY = f.readline().strip()
+except:
+    API_KEY = input("Enter your API key from https://platform.openai.com/account/api-keys: ")
+    with open("api_key", "w") as f:
+        f.write(API_KEY)
+        
+
+print(Fore.LIGHTBLUE_EX + "Paste/Enter you content. Press Ctrl+D to finish.")
+
+message = []
+while True:
+    while True:
+        try:
+            line = input(Fore.GREEN)
+        except EOFError:
+            print(Fore.LIGHTBLUE_EX + "\nEnd of input")
+            break
+        except KeyboardInterrupt:
+            exit()
+        message.append(line)
+    message = r'\n'.join(message)
+    if message == "clear":
+        cls()
+        message = []
+        print(Fore.LIGHTBLUE_EX + "Paste/Enter you content. Press Ctrl+D to finish.")
+        continue
+    main(API_KEY, engine, message)
+    print(Fore.LIGHTBLUE_EX + "\nPress Ctrl+C to exit or write new message.\n")
+    message = []
+
