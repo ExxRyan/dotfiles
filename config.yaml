@@ -9,7 +9,7 @@ actions:
   pre:
     enable_perm_sudo: echo "ZWNobyBEdXJpbmcgdGhlIGluc3RhbGwsIHlvdXIgdXNlciB3aWxsIGJlIGFibGUgdG8gcnVuIHN1ZG8gd2l0aG91dCBwYXNzd29yZCwgdG8gaGF2ZSBhIHNpbGVudCBpbnN0YWxsIHdpdGhvdXQgeW91ciBhY3Rpb24hO3NsZWVwIDEwO2VjaG8gIiRVU0VSIEFMTD0oQUxMKSBOT1BBU1NXRDogQUxMIiB8IHN1ZG8gdGVlIC9ldGMvc3Vkb2Vycy5kLzAxX2BlY2hvICRVU0VSYF9ub3Bhc3N3ZAo=" | base64 -d | bash
   post:
-    01_install_packages: yay -Syyuu --noconfirm --needed - < {{@@ _dotfile_abs_dst @@}}
+    01_install_packages: echo "eWF5IC1TeTt3aGlsZSByZWFkIHBhY2thZ2U7IGRvIGVjaG8gLWUgIlwwMzNbMDszMm1JbnN0YWxsaW5nIHBhY2thZ2UgJHBhY2thZ2VcMDMzWzBtIjsgeWF5IC1TIC0tbmVlZGVkIC0tbm9jb25maXJtICIkcGFja2FnZSI7IGRvbmUgPCAkSE9NRS9wYWNtYW4tbGlzdC50eHQ=" | base64 -d | bash
     02_change_shell: sudo chsh -s /bin/zsh $USER
     chmod_dst_folder: chmod {0} {{@@ _dotfile_abs_dst @@}}/*
     03_add_user_to_groups: sudo usermod -aG games,network,power,polkitd,vboxusers,usbmux,wireshark,docker,rfkill,users,video,storage,optical,kvm,input,disk,audio,wheel $USER
